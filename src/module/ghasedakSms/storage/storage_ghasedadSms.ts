@@ -5,7 +5,7 @@ function initPrivateGhasedakSmsConfigsDefault(nk: nkruntime.Nakama, logger: nkru
             collection: "private_configuration",
             key: "ghasedakSms_configs",
             userId: StaticData.ADMIN_USER_ID,
-            value: createPrivateLoginConfigsDefault(),
+            value: createPrivateGhasedakSmsConfigsDefault(),
             permissionRead: 0,
             permissionWrite: 0,
             version: "*"
@@ -29,7 +29,7 @@ function getPrivateGhasedakSmsConfigs(nk: nkruntime.Nakama, logger: nkruntime.Lo
             {
                 collection: "private_configuration",
                 key: "ghasedakSms_configs",
-                userId: null
+                userId: StaticData.ADMIN_USER_ID
             };
         let res: nkruntime.StorageObject[] = nk.storageRead([configs]);
         return [res[0].version, res[0].value as PrivateGhasedakSmsConfigsModel]

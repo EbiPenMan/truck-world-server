@@ -1,0 +1,6 @@
+class PrivateServerConfigsModel {
+    
+    
+    constructor() {
+    }
+}
