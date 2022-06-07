@@ -2,7 +2,7 @@ const login_init = function (ctx: nkruntime.Context, logger: nkruntime.Logger, n
     
     //TODO init db table needed for store codes
     //TODO get login configs from server
-    createTables(ctx, logger, nk);
+    login_createTables(ctx, logger, nk);
     initPrivateLoginConfigsDefault(nk, logger);
     
     

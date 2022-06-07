@@ -12,6 +12,7 @@ let InitModule: nkruntime.InitModule =
         initializer.registerBeforeAuthenticateCustom(hook_login_beforeAuthenticateCustom);
         initializer.registerAfterAuthenticateCustom(hook_login_afterAuthenticateCustom);
         
+        place_init(ctx, logger, nk);
         
         // InitTable(nk, logger);
         // InitConfigs(nk, logger);

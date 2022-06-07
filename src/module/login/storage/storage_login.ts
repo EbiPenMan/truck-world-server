@@ -1,4 +1,4 @@
-function createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
+function login_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
     
     logger.info(" ------ login start CREATE TABLE --------------------------------------")
     
