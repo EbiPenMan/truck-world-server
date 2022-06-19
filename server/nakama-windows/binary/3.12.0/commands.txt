@@ -1,0 +1,4 @@
+cockroach.exe start-single-node --insecure --listen-addr=127.0.0.1 --store=path=E:\Programming\hero-game\server\project\db-data,size=20GB
+nakama.exe migrate up
+
+nakama --config E:\Programming\hero-game\server\project\nakama\config.yml
