@@ -3,7 +3,7 @@
     "./src/**/*"
   ],
   "compilerOptions": {
-    "outFile": "../data/modules/index.js",
+    "outFile": "server/data/modules/index.js",
     "target": "es5",
     "strict": false,
     "removeComments": true,

@@ -1,10 +1,10 @@
 function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
-    
+
     logger.info(" ------ place start CREATE TABLE --------------------------------------")
-    
-    
+
+
     let parameters: any = [];
-    let queryStr: string = 'CREATE TABLE IF NOT EXISTS z_place_verify_code (' +
+    let queryStr: string = 'CREATE TABLE IF NOT EXISTS z_place (' +
         'id UUID NOT NULL DEFAULT gen_random_uuid(), ' +
         'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
@@ -23,15 +23,18 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'verified_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'verified_by UUID NOT NULL, ' +
         'status SMALLINT NOT NULL,' +
-        'CONSTRAINT "primary" PRIMARY KEY (id ASC)' +
+        'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
+        'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
+        'CONSTRAINT fk_owner_id_ref_users  FOREIGN  KEY(owner_id)  REFERENCES  users(id),' +
+        'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id)' +
         ')';
-    
-    
+
+
     runSqlQuery(nk, logger, queryStr, parameters);
-    
+
     logger.info(" ------ place end CREATE TABLE --------------------------------------")
-    
-    
+
+
 }
 
 
