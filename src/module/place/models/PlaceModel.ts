@@ -17,8 +17,9 @@ enum PlaceCategory {
 
 enum PlaceStatus {
     None = 0,
-    SELECT = 1,
-    INSERT = 2,
-    UPDATE = 3,
-    DELETE = 4
+    VerifyNeed = 1,
+    EditNeed = 2,
+    Hide = 3,
+    Disable = 4,
+    Enable = 4,
 }
