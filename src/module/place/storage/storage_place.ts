@@ -8,10 +8,10 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'id UUID NOT NULL DEFAULT gen_random_uuid(), ' +
         'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'type_place SMALLINT NOT NULL,' +
-        'category SMALLINT NOT NULL,' +
+        'type_place SMALLINT NOT NULL DEFAULT 0,' +
+        'category SMALLINT NOT NULL DEFAULT 0,' +
         'creator_id UUID NOT NULL, ' +
-        'owner_id UUID NOT NULL, ' +
+        'owner_id UUID, ' +
         'logo_url VARCHAR(512),' +
         'images_url VARCHAR[],' +
         'title VARCHAR(512),' +
@@ -20,9 +20,9 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'address VARCHAR(512),' +
         'attributes JSONB,' +
         'verify_state BOOL DEFAULT FALSE,' +
-        'verified_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'verified_by UUID NOT NULL, ' +
-        'status SMALLINT NOT NULL,' +
+        'verified_at TIMESTAMP,' +
+        'verified_by UUID, ' +
+        'status SMALLINT NOT NULL DEFAULT 0,' +
         'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
         'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
         'CONSTRAINT fk_owner_id_ref_users  FOREIGN  KEY(owner_id)  REFERENCES  users(id),' +
