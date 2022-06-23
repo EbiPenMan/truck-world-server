@@ -19,7 +19,7 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'location GEOGRAPHY,' +
         'address VARCHAR(512),' +
         'attributes JSONB,' +
-        'verify_state BOOL DEFAULT FALSE,' +
+        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
         'verified_at TIMESTAMP,' +
         'verified_by UUID, ' +
         'status SMALLINT NOT NULL DEFAULT 0,' +
