@@ -15,6 +15,9 @@ var InitModule = function (ctx, logger, nk, initializer) {
     initializer.registerBeforeAuthenticateCustom(hook_login_beforeAuthenticateCustom);
     initializer.registerAfterAuthenticateCustom(hook_login_afterAuthenticateCustom);
     place_init(ctx, logger, nk);
+    initializer.registerRpc('rpc_place_getList', rpc_place_getList);
+    comment_init(ctx, logger, nk);
+    initializer.registerRpc('rpc_comment_getList', rpc_comment_getList);
 };
 function InitTable(nk, logger) {
     logger.info("============= Start Init tables =============");
@@ -348,6 +351,132 @@ var decrypt = function (salt, encoded) {
 function parseISOString(s) {
     var b = s.split(/\D+/);
     return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+}
+var comment_init = function (ctx, logger, nk) {
+    comment_createTables(ctx, logger, nk);
+    initPrivateCommentConfigsDefault(nk, logger);
+};
+var CommentModel = (function () {
+    function CommentModel() {
+    }
+    return CommentModel;
+}());
+var CommentType;
+(function (CommentType) {
+    CommentType[CommentType["None"] = 0] = "None";
+})(CommentType || (CommentType = {}));
+var CommentCategory;
+(function (CommentCategory) {
+    CommentCategory[CommentCategory["None"] = 0] = "None";
+    CommentCategory[CommentCategory["ShopCar"] = 1] = "ShopCar";
+    CommentCategory[CommentCategory["ShopCarAccessory"] = 2] = "ShopCarAccessory";
+    CommentCategory[CommentCategory["GasStation"] = 3] = "GasStation";
+    CommentCategory[CommentCategory["Restaurant"] = 4] = "Restaurant";
+    CommentCategory[CommentCategory["CarService"] = 4] = "CarService";
+})(CommentCategory || (CommentCategory = {}));
+var CommentStatus;
+(function (CommentStatus) {
+    CommentStatus[CommentStatus["None"] = 0] = "None";
+    CommentStatus[CommentStatus["VerifyNeed"] = 1] = "VerifyNeed";
+    CommentStatus[CommentStatus["EditNeed"] = 2] = "EditNeed";
+    CommentStatus[CommentStatus["Hide"] = 3] = "Hide";
+    CommentStatus[CommentStatus["Disable"] = 4] = "Disable";
+    CommentStatus[CommentStatus["Enable"] = 4] = "Enable";
+})(CommentStatus || (CommentStatus = {}));
+var PrivateCommentConfigsModel = (function () {
+    function PrivateCommentConfigsModel() {
+    }
+    return PrivateCommentConfigsModel;
+}());
+var rpc_comment_getList = function (ctx, logger, nk, payload) {
+    try {
+        var input = JSON.parse(payload);
+        var dbRes = getCommentsList(ctx, logger, nk, input);
+        return JSON.stringify(dbRes);
+    }
+    catch (e) {
+        return JSON.stringify(new BaseResponseModel(null, new BaseErrorModel(0, "exception")));
+    }
+};
+function comment_createTables(ctx, logger, nk) {
+    logger.info(" ------ comment start CREATE TABLE --------------------------------------");
+    var parameters = [];
+    var queryStr = 'CREATE TABLE IF NOT EXISTS z_comment (' +
+        'id UUID NOT NULL DEFAULT gen_random_uuid(),' +
+        'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
+        'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
+        'text VARCHAR,' +
+        'like_id UUID,' +
+        'unlike_id UUID,' +
+        'rate_id UUID,' +
+        'quote_comment_id UUID,' +
+        'type_comment SMALLINT NOT NULL DEFAULT 0,' +
+        'category SMALLINT NOT NULL DEFAULT 0,' +
+        'creator_id UUID NOT NULL,' +
+        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
+        'verified_at TIMESTAMP,' +
+        'verified_by UUID, ' +
+        'status SMALLINT NOT NULL DEFAULT 0,' +
+        'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
+        'CONSTRAINT fk_like_id_ref_likes  FOREIGN  KEY(like_id)  REFERENCES  z_like(id),' +
+        'CONSTRAINT fk_unlike_id_ref_unlikes  FOREIGN  KEY(unlike_id)  REFERENCES  z_unlike(id),' +
+        'CONSTRAINT fk_rate_id_ref_rates  FOREIGN  KEY(rate_id)  REFERENCES  z_rate(id),' +
+        'CONSTRAINT fk_quote_comment_id_ref_comments  FOREIGN  KEY(quote_comment_id)  REFERENCES  z_comment(id),' +
+        'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
+        'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id)' +
+        ')';
+    runSqlQuery(nk, logger, queryStr, parameters);
+    logger.info(" ------ comment end CREATE TABLE --------------------------------------");
+}
+function initPrivateCommentConfigsDefault(nk, logger) {
+    var configs = {
+        collection: "private_configuration",
+        key: "comment_configs",
+        userId: StaticData.ADMIN_USER_ID,
+        value: createPrivateCommentConfigsDefault(),
+        permissionRead: 0,
+        permissionWrite: 0,
+        version: "*"
+    };
+    try {
+        nk.storageWrite([configs]);
+    }
+    catch (e) {
+        logger.error("init configs error", e);
+    }
+}
+function createPrivateCommentConfigsDefault() {
+    var result = new PrivateCommentConfigsModel();
+    return result;
+}
+function getPrivateCommentConfigs(nk, logger) {
+    try {
+        var configs = {
+            collection: "private_configuration",
+            key: "comment_configs",
+            userId: StaticData.ADMIN_USER_ID
+        };
+        var res = nk.storageRead([configs]);
+        return [res[0].version, res[0].value];
+    }
+    catch (error) {
+        logger.error('An error occurred: %s', error);
+        return [null, null];
+    }
+}
+function getCommentsList(ctx, logger, nk, queryModel) {
+    logger.info(" ------ login getVerifyCodeByPhone --------------------------------------");
+    queryModel.tableName = "z_comment";
+    var query = generate_select_query(nk, logger, queryModel);
+    try {
+        var result = runSqlQuery(nk, logger, query, []);
+        if (result.length > 0)
+            return result;
+        return null;
+    }
+    catch (e) {
+        return null;
+    }
 }
 var db_init = function (ctx, logger, nk) {
 };
@@ -819,33 +948,82 @@ var place_init = function (ctx, logger, nk) {
     place_createTables(ctx, logger, nk);
     initPrivatePlaceConfigsDefault(nk, logger);
 };
+var WorkTime = (function () {
+    function WorkTime() {
+    }
+    return WorkTime;
+}());
+var WorkTimeShift = (function () {
+    function WorkTimeShift() {
+    }
+    return WorkTimeShift;
+}());
+var PlaceModel = (function () {
+    function PlaceModel() {
+    }
+    return PlaceModel;
+}());
+var PlaceType;
+(function (PlaceType) {
+    PlaceType[PlaceType["None"] = 0] = "None";
+})(PlaceType || (PlaceType = {}));
+var PlaceCategory;
+(function (PlaceCategory) {
+    PlaceCategory[PlaceCategory["None"] = 0] = "None";
+    PlaceCategory[PlaceCategory["ShopCar"] = 1] = "ShopCar";
+    PlaceCategory[PlaceCategory["ShopCarAccessory"] = 2] = "ShopCarAccessory";
+    PlaceCategory[PlaceCategory["GasStation"] = 3] = "GasStation";
+    PlaceCategory[PlaceCategory["Restaurant"] = 4] = "Restaurant";
+    PlaceCategory[PlaceCategory["CarService"] = 4] = "CarService";
+})(PlaceCategory || (PlaceCategory = {}));
+var PlaceStatus;
+(function (PlaceStatus) {
+    PlaceStatus[PlaceStatus["None"] = 0] = "None";
+    PlaceStatus[PlaceStatus["VerifyNeed"] = 1] = "VerifyNeed";
+    PlaceStatus[PlaceStatus["EditNeed"] = 2] = "EditNeed";
+    PlaceStatus[PlaceStatus["Hide"] = 3] = "Hide";
+    PlaceStatus[PlaceStatus["Disable"] = 4] = "Disable";
+    PlaceStatus[PlaceStatus["Enable"] = 4] = "Enable";
+})(PlaceStatus || (PlaceStatus = {}));
 var PrivatePlaceConfigsModel = (function () {
     function PrivatePlaceConfigsModel() {
     }
     return PrivatePlaceConfigsModel;
 }());
+var rpc_place_getList = function (ctx, logger, nk, payload) {
+    try {
+        var input = JSON.parse(payload);
+        var dbRes = getPlacesList(ctx, logger, nk, input);
+        return JSON.stringify(dbRes);
+    }
+    catch (e) {
+        return JSON.stringify(new BaseResponseModel(null, new BaseErrorModel(0, "exception")));
+    }
+};
 function place_createTables(ctx, logger, nk) {
     logger.info(" ------ place start CREATE TABLE --------------------------------------");
     var parameters = [];
     var queryStr = 'CREATE TABLE IF NOT EXISTS z_place (' +
-        'id UUID NOT NULL DEFAULT gen_random_uuid(), ' +
+        'id UUID NOT NULL DEFAULT gen_random_uuid(),' +
         'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'type_place SMALLINT NOT NULL,' +
-        'category SMALLINT NOT NULL,' +
-        'creator_id UUID NOT NULL, ' +
-        'owner_id UUID NOT NULL, ' +
+        'type_place SMALLINT NOT NULL DEFAULT 0,' +
+        'category SMALLINT NOT NULL DEFAULT 0,' +
+        'creator_id UUID NOT NULL,' +
+        'owner_id UUID,' +
         'logo_url VARCHAR(512),' +
         'images_url VARCHAR[],' +
         'title VARCHAR(512),' +
         'description VARCHAR,' +
         'location GEOGRAPHY,' +
         'address VARCHAR(512),' +
-        'attributes JSONB,' +
-        'verify_state BOOL DEFAULT FALSE,' +
-        'verified_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'verified_by UUID NOT NULL, ' +
-        'status SMALLINT NOT NULL,' +
+        'attributes_key VARCHAR(128)[],' +
+        'attributes_type SMALLINT[],' +
+        'attributes_value VARCHAR[],' +
+        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
+        'verified_at TIMESTAMP,' +
+        'verified_by UUID, ' +
+        'status SMALLINT NOT NULL DEFAULT 0,' +
         'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
         'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
         'CONSTRAINT fk_owner_id_ref_users  FOREIGN  KEY(owner_id)  REFERENCES  users(id),' +
@@ -888,6 +1066,20 @@ function getPrivatePlaceConfigs(nk, logger) {
     catch (error) {
         logger.error('An error occurred: %s', error);
         return [null, null];
+    }
+}
+function getPlacesList(ctx, logger, nk, queryModel) {
+    logger.info(" ------ login getVerifyCodeByPhone --------------------------------------");
+    queryModel.tableName = "z_place";
+    var query = generate_select_query(nk, logger, queryModel);
+    try {
+        var result = runSqlQuery(nk, logger, query, []);
+        if (result.length > 0)
+            return result;
+        return null;
+    }
+    catch (e) {
+        return null;
     }
 }
 var server_init = function (ctx, logger, nk) {

@@ -13,6 +13,11 @@ let InitModule: nkruntime.InitModule =
         initializer.registerAfterAuthenticateCustom(hook_login_afterAuthenticateCustom);
         
         place_init(ctx, logger, nk);
+        initializer.registerRpc('rpc_place_getList', rpc_place_getList);
+        
+        comment_init(ctx, logger, nk);
+        initializer.registerRpc('rpc_comment_getList', rpc_comment_getList);
+        
         
         // InitTable(nk, logger);
         // InitConfigs(nk, logger);

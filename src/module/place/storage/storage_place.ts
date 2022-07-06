@@ -1,24 +1,25 @@
 function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
 
     logger.info(" ------ place start CREATE TABLE --------------------------------------")
-
-
+    
     let parameters: any = [];
     let queryStr: string = 'CREATE TABLE IF NOT EXISTS z_place (' +
-        'id UUID NOT NULL DEFAULT gen_random_uuid(), ' +
+        'id UUID NOT NULL DEFAULT gen_random_uuid(),' +
         'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
         'type_place SMALLINT NOT NULL DEFAULT 0,' +
         'category SMALLINT NOT NULL DEFAULT 0,' +
-        'creator_id UUID NOT NULL, ' +
-        'owner_id UUID, ' +
+        'creator_id UUID NOT NULL,' +
+        'owner_id UUID,' +
         'logo_url VARCHAR(512),' +
         'images_url VARCHAR[],' +
         'title VARCHAR(512),' +
         'description VARCHAR,' +
         'location GEOGRAPHY,' +
         'address VARCHAR(512),' +
-        'attributes JSONB,' +
+        'attributes_key VARCHAR(128)[],' +
+        'attributes_type SMALLINT[],' +
+        'attributes_value VARCHAR[],' +
         'verify_state SMALLINT NOT NULL DEFAULT 0,' +
         'verified_at TIMESTAMP,' +
         'verified_by UUID, ' +
@@ -28,13 +29,8 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'CONSTRAINT fk_owner_id_ref_users  FOREIGN  KEY(owner_id)  REFERENCES  users(id),' +
         'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id)' +
         ')';
-
-
     runSqlQuery(nk, logger, queryStr, parameters);
-
     logger.info(" ------ place end CREATE TABLE --------------------------------------")
-
-
 }
 
 
@@ -75,4 +71,25 @@ function getPrivatePlaceConfigs(nk: nkruntime.Nakama, logger: nkruntime.Logger):
         logger.error('An error occurred: %s', error);
         return [null, null];
     }
+}
+
+function getPlacesList(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, queryModel: QueryInputModel): PlaceModel[] {
+    
+    logger.info(" ------ login getVerifyCodeByPhone --------------------------------------")
+    
+    queryModel.tableName = "z_place";
+    // queryModel.whereModels = [new DbWhereModel([new DbWhereFieldModel("phone_number", `'${phoneNumber}'`, OperatorType.Equal)])];
+    
+    
+    const query = generate_select_query(nk, logger, queryModel);
+    try {
+        const result: nkruntime.SqlQueryResult = runSqlQuery(nk, logger, query, []);
+        if (result.length > 0)
+            return result as PlaceModel[];
+        return null;
+    } catch (e) {
+        return null;
+    }
+    
+    
 }

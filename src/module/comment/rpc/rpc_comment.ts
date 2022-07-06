@@ -1,6 +1,4 @@
-
-
-const rpc_place_getList: nkruntime.RpcFunction =
+const rpc_comment_getList: nkruntime.RpcFunction =
     function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
         try {
             const input: QueryInputModel = JSON.parse(payload);
@@ -11,5 +9,7 @@ const rpc_place_getList: nkruntime.RpcFunction =
         }
         
     }
-
-
+    
+//TODO save comment
+//TODO delete comment
+//TODO update comment

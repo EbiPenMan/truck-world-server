@@ -5,6 +5,8 @@ const place_init = function (ctx: nkruntime.Context, logger: nkruntime.Logger, n
     
     
     
+    
+    
 }
 
 

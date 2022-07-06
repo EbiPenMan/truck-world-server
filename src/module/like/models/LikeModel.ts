@@ -1,12 +1,12 @@
-class CommentModel {
+class LikeModel {
 
 }
 
-enum CommentType {
+enum LikeType {
     None = 0
 }
 
-enum CommentCategory {
+enum LikeCategory {
     None = 0,
     ShopCar = 1,
     ShopCarAccessory = 2,
@@ -15,7 +15,7 @@ enum CommentCategory {
     CarService = 4,
 }
 
-enum CommentStatus {
+enum LikeStatus {
     None = 0,
     VerifyNeed = 1,
     EditNeed = 2,
