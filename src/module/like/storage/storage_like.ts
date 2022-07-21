@@ -4,23 +4,44 @@ function like_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk:
     
     let parameters: any = [];
     let queryStr: string = 'CREATE TABLE IF NOT EXISTS z_like (' +
+    
         'id UUID NOT NULL DEFAULT gen_random_uuid(),' +
-        'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'text VARCHAR,' +
-        'liked BOOL,' +
-        'creator_id UUID NOT NULL,' +
-        'status SMALLINT NOT NULL DEFAULT 0,' +
-        'deleted BOOL,' +
-        'deleted_at TIMESTAMP DEFAULT now(),,' +
-        'deleted_by UUID,' +
         'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
-        'CONSTRAINT fk_like_id_ref_likes  FOREIGN  KEY(like_id)  REFERENCES  z_like(id),' +
-        'CONSTRAINT fk_unlike_id_ref_unlikes  FOREIGN  KEY(unlike_id)  REFERENCES  z_unlike(id),' +
-        'CONSTRAINT fk_rate_id_ref_rates  FOREIGN  KEY(rate_id)  REFERENCES  z_rate(id),' +
-        'CONSTRAINT fk_quote_like_id_ref_likes  FOREIGN  KEY(quote_like_id)  REFERENCES  z_like(id),' +
-        'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
-        'CONSTRAINT fk_deleted_by_ref_users  FOREIGN  KEY(deleted_by)  REFERENCES  users(id)' +
+    
+        'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
+        'created_by UUID NOT NULL,' +
+        'CONSTRAINT fk_created_by_ref_users  FOREIGN  KEY(created_by)  REFERENCES  users(id),' +
+    
+        'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
+    
+        'deleted BOOL DEFAULT FALSE,' +
+        'deleted_at TIMESTAMP DEFAULT now(),' +
+        'deleted_by UUID,' +
+        'CONSTRAINT fk_deleted_by_ref_users  FOREIGN  KEY(deleted_by)  REFERENCES  users(id),' +
+    
+        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
+        'verified_at TIMESTAMP,' +
+        'verify_text VARCHAR[],' +
+        'verified_by UUID, ' +
+        'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id),' +
+    
+        'status SMALLINT NOT NULL DEFAULT 0,' +
+    
+        'place_id UUID,' +
+        'CONSTRAINT fk_place_id_ref_comments  FOREIGN  KEY(place_id)  REFERENCES  z_place(id),' +
+    
+        'help_id UUID,' +
+        'CONSTRAINT fk_help_id_ref_helps  FOREIGN  KEY(help_id)  REFERENCES  z_help(id),' +
+    
+        'shop_id UUID,' +
+        'CONSTRAINT fk_shop_id_ref_shops  FOREIGN  KEY(shop_id)  REFERENCES  z_shop(id),' +
+    
+        'news_id UUID,' +
+        'CONSTRAINT fk_news_id_ref_news  FOREIGN  KEY(news_id)  REFERENCES  z_news(id),' +
+        
+        'like_value SMALLINT NOT NULL DEFAULT 0,' +
+        'score_text VARCHAR,' +
+        'score_value SMALLINT' +
         ')';
     runSqlQuery(nk, logger, queryStr, parameters);
     logger.info(" ------ like end CREATE TABLE --------------------------------------")

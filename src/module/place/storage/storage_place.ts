@@ -4,13 +4,35 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
     
     let parameters: any = [];
     let queryStr: string = 'CREATE TABLE IF NOT EXISTS z_place (' +
+    
         'id UUID NOT NULL DEFAULT gen_random_uuid(),' +
+        'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
+    
         'created_at TIMESTAMP NOT NULL DEFAULT now(),' +
+        'created_by UUID NOT NULL,' +
+        'CONSTRAINT fk_created_by_ref_users  FOREIGN  KEY(created_by)  REFERENCES  users(id),' +
+        
         'updated_at TIMESTAMP NOT NULL DEFAULT now(),' +
-        'type_place SMALLINT NOT NULL DEFAULT 0,' +
+    
+        'deleted BOOL DEFAULT FALSE,' +
+        'deleted_at TIMESTAMP DEFAULT now(),' +
+        'deleted_by UUID,' +
+        'CONSTRAINT fk_deleted_by_ref_users  FOREIGN  KEY(deleted_by)  REFERENCES  users(id),' +
+    
+        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
+        'verified_at TIMESTAMP,' +
+        'verify_text VARCHAR[],' +
+        'verified_by UUID, ' +
+        'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id),' +
+    
+        'status SMALLINT NOT NULL DEFAULT 0,' +
+    
+        'owned_by UUID,' +
+        'CONSTRAINT fk_owned_by_ref_users  FOREIGN  KEY(owned_by)  REFERENCES  users(id),' +
+        
+        'place_type SMALLINT NOT NULL DEFAULT 0,' +
         'category SMALLINT NOT NULL DEFAULT 0,' +
-        'creator_id UUID NOT NULL,' +
-        'owner_id UUID,' +
+        
         'logo_url VARCHAR(512),' +
         'images_url VARCHAR[],' +
         'title VARCHAR(512),' +
@@ -19,15 +41,7 @@ function place_createTables(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         'address VARCHAR(512),' +
         'attributes_key VARCHAR(128)[],' +
         'attributes_type SMALLINT[],' +
-        'attributes_value VARCHAR[],' +
-        'verify_state SMALLINT NOT NULL DEFAULT 0,' +
-        'verified_at TIMESTAMP,' +
-        'verified_by UUID, ' +
-        'status SMALLINT NOT NULL DEFAULT 0,' +
-        'CONSTRAINT "primary" PRIMARY KEY (id ASC),' +
-        'CONSTRAINT fk_creator_id_ref_users  FOREIGN  KEY(creator_id)  REFERENCES  users(id),' +
-        'CONSTRAINT fk_owner_id_ref_users  FOREIGN  KEY(owner_id)  REFERENCES  users(id),' +
-        'CONSTRAINT fk_verified_by_ref_users  FOREIGN  KEY(verified_by)  REFERENCES  users(id)' +
+        'attributes_value VARCHAR[]' +
         ')';
     runSqlQuery(nk, logger, queryStr, parameters);
     logger.info(" ------ place end CREATE TABLE --------------------------------------")
